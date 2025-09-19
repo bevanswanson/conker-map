@@ -20,9 +20,9 @@ jobs:
     - name: Deploy Docker app
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
-          cd ~/conker-map || git clone git@github.com:${{ github.repository }} ~/conker-map
-          cd ~/conker-map
-          git pull
-          docker-compose down
-          docker-compose up -d --build
+        rm -rf ~/conker-map
+
+        GIT_SSH_COMMAND='ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no' git clone git@github.com:bevanswanson/conker-map.git ~/conker-map
+        cd ~/conker-map
+        docker compose up -d --build
         "
