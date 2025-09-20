@@ -17,8 +17,6 @@ services:
 
   backend:
     build: ./backend
-    ports:
-      - "5000:5000"
     environment:
       - DATABASE_URL=postgresql://conker_user:conker_pass@db:5432/conker_db
     depends_on:
@@ -32,7 +30,7 @@ services:
   frontend:
     image: nginx:alpine
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
