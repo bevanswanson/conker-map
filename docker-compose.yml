@@ -1,7 +1,43 @@
 version: "3.9"
+
 services:
-  web:
-    build: .
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: conker_db
+      POSTGRES_USER: conker_user
+      POSTGRES_PASSWORD: conker_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conker_user -d conker_db -q"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
     ports:
       - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://conker_user:conker_pass@db:5432/conker_db
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "python app.py"  # optionally can add retry logic in app.py
+    volumes:
+      - ./backend:/app
 
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
